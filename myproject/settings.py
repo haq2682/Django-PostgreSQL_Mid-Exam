@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-91tdsmiz5%+3x@0=2yd-*-^uuk6kv=ap-5rf(k(%z3p&+2_@-c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', 'django-postgresqlmid-exam-production.up.railway.app']
 
 
 # Application definition

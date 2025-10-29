@@ -99,9 +99,8 @@ jobs:
       
       - name: Deploy to Railway
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_TOKEN: 13a40fbc-3c86-47d2-8ab3-cdfc6c0bdf45
         run: |
-          echo "$RAILWAY_TOKEN" | railway login
           railway whoami
-          railway link --project "${{ secrets.RAILWAY_PROJECT_ID }}"
+          railway link --project "a2b12ff7-fd4c-4140-8ea4-ae69027bbb89"
           railway up --detach

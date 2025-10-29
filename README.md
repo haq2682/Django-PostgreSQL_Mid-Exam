@@ -65,8 +65,6 @@ python manage.py createsuperuser
 python manage.py runserver 0.0.0.0:5000
 ```
 
-Open: http://localhost:5000 (admin: /admin)
-
 ---
 
 ## Migrations, seed & sample data

@@ -1,0 +1,85 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+  lint-security:
+    runs-on: ubuntu-latest
+    needs: build-install
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - run: |
+          pip install flake8 bandit
+          flake8 .
+          bandit -r .
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint-security
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: ${{ secrets.DB_NAME }}
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - run: pip install -r requirements.txt
+      
+      - run: python manage.py test
+        env:
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: localhost
+          DB_PORT: 5432
+
+  build-docker:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      
+      - run: docker build -t myapp:latest .
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-docker
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - run: echo "Deploying application"

@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - mid-exam-network
+
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    networks:
+      - mid-exam-network
+    depends_on:
+      - db
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: db
+      DB_PORT: 5432
+
+networks:
+  mid-exam-network:
+    driver: bridge
+volumes:
+  postgres_data:

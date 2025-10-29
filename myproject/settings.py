@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +30,7 @@ SECRET_KEY = 'django-insecure-91tdsmiz5%+3x@0=2yd-*-^uuk6kv=ap-5rf(k(%z3p&+2_@-c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -76,12 +81,12 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'carsdb',
-        'USER': 'carsadmin',
-        'PASSWORD': 'carspass',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'carsdb'),
+        'USER': os.environ.get('DB_USER', ''),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', 'db'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 

@@ -101,12 +101,5 @@ jobs:
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          echo "========================================="
-          echo "Deployment Started"
-          echo "========================================="
-          echo "Branch: ${{ github.ref_name }}"
-          echo "Commit: ${{ github.sha }}"
           railway link ${{ secrets.RAILWAY_PROJECT_ID }}
           railway up
-          echo "Deployment completed successfully"
-          echo "========================================="

@@ -181,6 +181,13 @@ railway logs
 git push origin main
 ```
 ---
+## View Website
+- Live app: https://django-postgresqlmid-exam-production.up.railway.app
+- View a car by ID at ` /cars/<id> `. Examples:
+  - https://django-postgresqlmid-exam-production.up.railway.app/cars/1
+  - https://django-postgresqlmid-exam-production.up.railway.app/cars/2
+  - https://django-postgresqlmid-exam-production.up.railway.app/cars/3
+- Seed data currently includes IDs 1–3.
 
 ## 6. Lessons Learned
 

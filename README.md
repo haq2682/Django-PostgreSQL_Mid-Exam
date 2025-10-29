@@ -115,7 +115,7 @@ Keep secrets in GitHub Settings → Secrets and variables → Actions.
 
 ---
 
-## Railway deployment (concise setup)
+## Railway deployment
 1. Create Railway account and new project → Add PostgreSQL plugin (Railway provisions DB).  
 2. Add a service (connect GitHub repo or deploy via image). Railway shows service name (top of service card).  
 3. Ensure your Dockerfile runs migrations on start, or run migrations from the deploy step:
@@ -131,7 +131,7 @@ CMD python manage.py migrate && python manage.py runserver 0.0.0.0:$PORT
 
 ---
 
-## Common commands (cheat sheet)
+## Common commands 
 - Build & run: docker compose up --build  
 - Stop & remove: docker compose down -v  
 - Build image: docker build -t <user>/django-app:latest .  
@@ -142,7 +142,13 @@ CMD python manage.py migrate && python manage.py runserver 0.0.0.0:$PORT
 - Railway CLI: npm i -g @railway/cli; railway up --service <service>; railway logs
 
 ---
-
+## View Website
+- Live app: https://django-postgresqlmid-exam-production.up.railway.app
+- View a car by ID at ` /cars/<id> `. Examples:
+  - https://django-postgresqlmid-exam-production.up.railway.app/cars/1
+  - https://django-postgresqlmid-exam-production.up.railway.app/cars/2
+  - https://django-postgresqlmid-exam-production.up.railway.app/cars/3
+- Seed data currently includes IDs 1–3.
 ## Project structure 
 ```
 .

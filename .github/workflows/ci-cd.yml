@@ -101,5 +101,6 @@ jobs:
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
+          railway login --browserless
           railway link -p a2b12ff7-fd4c-4140-8ea4-ae69027bbb89
           railway up

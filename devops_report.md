@@ -152,7 +152,7 @@ python manage.py dbshell
 
 ---
 
-## 6. Key Commands
+## 5. Key Commands
 
 **Local / Docker**
 ```bash
@@ -180,10 +180,9 @@ railway logs
 ```bash
 git push origin main
 ```
-
 ---
 
-## 7. Lessons Learned
+## 6. Lessons Learned
 
 ### 1. Docker Compose vs Railway Deployment
 - **Issue:** Confusion between local `docker-compose.yml` and production setup.  

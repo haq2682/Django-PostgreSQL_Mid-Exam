@@ -1,55 +1,159 @@
-## Sample Django Project Using Postgres DB | ![Visitor Count](https://visitor-badge.glitch.me/badge?page_id=0xStryK3R.Sample-Django-Postgres-Project)
+# Django + PostgreSQL (Docker) — Project README
 
-1. Setup the DB Database:
-      ```sql
-      CREATE DATABASE carsdb;
-      CREATE USER carsadmin WITH ENCRYPTED PASSWORD 'carspass';
-      GRANT ALL PRIVILEGES ON DATABASE carsdb TO carsadmin;
-      ```
-2. Clone Git-Repo into Local Directory.
-3. Update DB credentials in _`settings.py`_ file in _`.\myproject\`_ folder to as per your own configuration.
-4. Open Command Line in main directory of project.
-5. Run below command inside project directory to setup environment
-      ```console
-      python -m venv venv
-      ```
-6. Activate enviroment with below command (for Windows):
-      ```console
-      venv\Scripts\activate
-      ```
-7. Run below command next to install required modules plus dependencies defined in `requirements.txt`
-      ```console
-      pip install -r requirements.txt
-      ```
-8. Migrate default/admin tables:
-      ```console
-      python manage.py makemigrations
-      python manage.py migrate
-      ```
-9. Create a super user(admin) for your project:
-      ```console
-      python manage.py createsuperuser
-      ```
-      > _**Note:** This user is used to manage administration for your project via the admins console: [`/admin`](http://localhost:5000/admin/)._
 
-10. Migrate cars tables - _`cars_car`_ and _`cars_driver`_ tables:
-      ```console
-      python manage.py makemigrations cars
-      python manage.py migrate cars
-      ```
-11. Insert some data into the newly created _`cars_car`_ and _`cars_driver`_ tables.
-    > _**Note:**_ _You can use sample insert queries provided in below files:_     
-    > [<img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/regular/file-lines.svg" width="15" height="15"> cars_car.txt](https://github.com/0xStryK3R/Sample-Django-Postgres-Project-/files/9330911/cars_car_sample_data.txt)     
-    > [<img src="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/regular/file-lines.svg" width="15" height="15"> cars_driver.txt](https://github.com/0xStryK3R/Sample-Django-Postgres-Project-/files/9330912/cars_driver_sample_data.txt)
+---
 
-12. Run the project:
-    ```console
-    python manage.py runserver 0.0.0.0:5000
-    ```    
-13. All Done!! [`Click Here`](http://localhost:5000/cars/1) to interact with your app:
+## What this repo contains
+- A Django app (cars) using PostgreSQL
+- Dockerfile and docker-compose.yml for local development
+- GitHub Actions workflow: build → lint/security → test (Postgres) → build image → deploy (Railway)
+- Helpers for automated migrations and optional data seeding
 
-> _**Assumptions**: Python and Postgres has been setup and running prior to starting with this project._
+---
 
-> _**References**: For Complete details, please refer [`How to use PostgreSQL with Django`](https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django) - the source article for this Repo._
+## Quick prerequisites
+- Docker & Docker Compose (for containerized local run)
+- Python 3.11 (if running locally without Docker)
+- GitHub repo with Actions enabled
+- Railway account (for production deployment)
 
-    
+---
+
+## Local setup (minimal)
+
+1. Create local DB user/database (only if running Django against local Postgres):
+```sql
+CREATE DATABASE carsdb;
+CREATE USER carsadmin WITH ENCRYPTED PASSWORD 'carspass';
+GRANT ALL PRIVILEGES ON DATABASE carsdb TO carsadmin;
+```
+
+2. Clone and enter repo:
+```bash
+git clone <repo-url>
+cd <repo>
+```
+
+3. Create .env (gitignored) — example:
+```env
+DB_NAME=carsdb
+DB_USER=carsadmin
+DB_PASSWORD=carspass
+DB_HOST=db
+DB_PORT=5432
+PORT=5000
+```
+
+4A. Run with Docker Compose (recommended):
+```bash
+docker compose up --build
+# then (optional) create superuser / run migrations:
+docker compose exec app python manage.py migrate
+docker compose exec app python manage.py createsuperuser
+```
+
+4B. Or run locally with venv:
+```bash
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# Unix:
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver 0.0.0.0:5000
+```
+
+Open: http://localhost:5000 (admin: /admin)
+
+---
+
+## Migrations, seed & sample data
+- Make and apply migrations:
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+- To export local data:
+```bash
+python manage.py dumpdata > data.json
+```
+- To import into Railway or another env:
+```bash
+python manage.py loaddata data.json
+```
+- You can also add a small management `seed` command and run it during container start to auto-populate rows.
+
+---
+
+## Testing & linting
+- Run tests:
+```bash
+python manage.py test
+# or in Docker:
+docker compose exec app python manage.py test
+```
+- Lint/security (recommended):
+```bash
+pip install flake8 bandit
+flake8 .   # adapt .flake8 to ignore migrations if needed
+bandit -r .
+```
+
+---
+
+## CI/CD summary (GitHub Actions)
+Pipeline stages:
+1. Build & Install — setup Python, install deps  
+2. Lint & Security — flake8, bandit (configurable non-blocking)  
+3. Test — starts a Postgres service in Actions, runs migrations and tests  
+4. Build Docker image — builds app image and optionally pushes to Docker Hub  
+5. Deploy — runs only on `main`; deploys to Railway and streams logs
+
+Keep secrets in GitHub Settings → Secrets and variables → Actions.
+
+---
+
+## Railway deployment (concise setup)
+1. Create Railway account and new project → Add PostgreSQL plugin (Railway provisions DB).  
+2. Add a service (connect GitHub repo or deploy via image). Railway shows service name (top of service card).  
+3. Ensure your Dockerfile runs migrations on start, or run migrations from the deploy step:
+```dockerfile
+CMD python manage.py migrate && python manage.py runserver 0.0.0.0:$PORT
+```
+4. Create Railway token: Account → Tokens → Create token.  
+5. Add GitHub secrets:
+- `RAILWAY_TOKEN` — token
+- `RAILWAY_SERVICE_NAME` — service name
+- `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` — if pushing images
+6. Push to `main` to trigger deploy via Actions.
+
+---
+
+## Common commands (cheat sheet)
+- Build & run: docker compose up --build  
+- Stop & remove: docker compose down -v  
+- Build image: docker build -t <user>/django-app:latest .  
+- Push image: docker login && docker push <user>/django-app:latest  
+- Migrate: python manage.py migrate  
+- Tests: python manage.py test  
+- Dump/load data: dumpdata / loaddata  
+- Railway CLI: npm i -g @railway/cli; railway up --service <service>; railway logs
+
+---
+
+## Project structure 
+```
+.
+├── .github/workflows/ci-cd.yml
+├── Dockerfile
+├── docker-compose.yml
+├── manage.py
+├── myproject/
+├── cars/
+├── requirements.txt
+├── .env (gitignored)
+├── .flake8
+└── README.md
+```

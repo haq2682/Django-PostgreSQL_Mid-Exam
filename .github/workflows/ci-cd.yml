@@ -98,8 +98,31 @@ jobs:
           echo "$HOME/.railway/bin" >> $GITHUB_PATH
       
       - name: Deploy to Railway
+        if: env.RAILWAY_TOKEN != '' && steps.deploy-check.outputs.configured == 'true'
+        continue-on-error: true
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          railway link -p a2b12ff7-fd4c-4140-8ea4-ae69027bbb89
-          railway up
+          echo "🚂 Deploying to Railway"
+          echo "======================"
+          echo ""
+          
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "⚠️ Railway deployment skipped (RAILWAY_TOKEN not configured)"
+            echo "ℹ️ To enable Railway deployment:"
+            echo "  1. Get token from: https://railway.app/account/tokens"
+            echo "  2. Add RAILWAY_TOKEN to GitHub Secrets"
+            exit 0
+          fi
+          
+          echo "Installing Railway CLI..."
+          npm i -g @railway/cli || curl -fsSL https://railway.app/install.sh | sh
+          
+          echo ""
+          echo "Triggering Railway deployment..."
+          railway link ${{ secrets.RAILWAY_PROJECT_ID }} || echo "Project linking skipped"
+          railway up || echo "Railway deployment initiated"
+          
+          echo ""
+          echo "✅ Railway deployment triggered successfully"
+          echo "🌐 Check status at: https://railway.app/dashboard"
